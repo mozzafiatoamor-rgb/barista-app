@@ -1,0 +1,1568 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1a1410">
+<title>Mozzafiato Baristas</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#1a1410;--surface:#2a2018;--surface2:#3a2e22;--surface3:#4a3c2e;--accent:#c8915a;--accent2:#d4a574;--green:#34d399;--red:#f87171;--yellow:#fbbf24;--blue:#60a5fa;--cyan:#22d3ee;--orange:#fb923c;--text:#f0e6d8;--text2:#a89880;--radius:14px}
+html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);height:100%;overflow:hidden;overscroll-behavior:none;-webkit-text-size-adjust:100%}
+.status-bar{display:flex;align-items:center;justify-content:space-between;padding:8px 16px 6px;background:var(--bg);position:sticky;top:0;z-index:100}
+.status-left{display:flex;align-items:center;gap:10px}.app-logo{height:36px;width:auto;object-fit:contain}
+.status-dot{width:8px;height:8px;border-radius:50%;background:var(--red);animation:pulse 2s infinite}.status-dot.connected{background:var(--green)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.status-right{display:flex;align-items:center;gap:8px}
+.user-badge{display:flex;align-items:center;gap:6px;background:var(--surface2);padding:4px 10px 4px 8px;border-radius:8px;font-size:11px;color:var(--text2);cursor:pointer;border:none;font-family:'DM Sans',sans-serif}
+.user-avatar{width:22px;height:22px;border-radius:6px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700}
+.user-name{font-weight:600;color:var(--text)}
+.config-btn{background:var(--surface2);border:none;color:var(--text2);width:36px;height:36px;border-radius:10px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.main-content{height:calc(100vh - 52px - 70px);overflow-y:scroll;padding:0 16px 80px;-webkit-overflow-scrolling:touch;touch-action:pan-y}.main-content::-webkit-scrollbar{display:none}
+.card{background:var(--surface);border-radius:var(--radius);padding:20px;margin-bottom:14px;border:1px solid rgba(255,255,255,.04);animation:slideUp .4s ease}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.card-title{font-size:15px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;display:flex;align-items:center;gap:8px}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.stats-grid.three{grid-template-columns:1fr 1fr 1fr}
+.stats-grid.four{grid-template-columns:1fr 1fr 1fr 1fr}
+.stat-box{background:var(--surface2);border-radius:12px;padding:16px;text-align:center;position:relative;overflow:hidden}
+.stat-box::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:3px 3px 0 0}
+.stat-box.purple::before{background:var(--accent)}.stat-box.green::before{background:var(--green)}.stat-box.blue::before{background:var(--blue)}.stat-box.red::before{background:var(--red)}.stat-box.cyan::before{background:var(--cyan)}.stat-box.orange::before{background:var(--orange)}.stat-box.brown::before{background:var(--accent)}
+.stat-number{font-family:'Space Mono',monospace;font-size:28px;font-weight:700;line-height:1}
+.stat-label{font-size:11px;color:var(--text2);margin-top:6px;text-transform:uppercase;letter-spacing:.5px}
+.inv-item{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--surface2);border-radius:10px;margin-bottom:8px;position:relative}
+.inv-name{font-size:14px;font-weight:500}.inv-cat{font-size:11px;color:var(--text2);margin-top:2px}
+.inv-stock{font-family:'Space Mono',monospace;font-size:16px;font-weight:700;text-align:right}
+.inv-stock.low{color:var(--red)}.inv-stock.ok{color:var(--green)}.inv-stock.warn{color:var(--yellow)}
+.inv-min{font-size:10px;color:var(--text2);text-align:right;margin-top:2px}
+.inv-unit{font-size:10px;color:var(--text2);margin-top:2px}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:6px;font-size:10px;font-weight:600;text-transform:uppercase}
+.badge.critical{background:rgba(248,113,113,.15);color:var(--red)}.badge.warning{background:rgba(251,191,36,.15);color:var(--yellow)}.badge.good{background:rgba(52,211,153,.15);color:var(--green)}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid rgba(255,255,255,.06);display:flex;height:70px;padding-bottom:env(safe-area-inset-bottom);z-index:100}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border:none;background:none;color:var(--text2);font-size:9px;font-weight:500;cursor:pointer;position:relative;font-family:'DM Sans',sans-serif}
+.nav-item.active{color:var(--accent)}.nav-item.active::before{content:'';position:absolute;top:0;width:32px;height:3px;background:var(--accent);border-radius:0 0 3px 3px}
+.nav-icon{font-size:20px}
+.form-group{margin-bottom:16px}.form-label{display:block;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+.form-input,.form-select,.form-textarea{width:100%;padding:14px 16px;background:var(--surface2);border:1px solid rgba(255,255,255,.06);border-radius:10px;color:var(--text);font-size:15px;font-family:'DM Sans',sans-serif;-webkit-appearance:none}
+.form-input:focus,.form-select:focus,.form-textarea:focus{outline:none;border-color:var(--accent)}
+.form-select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23a89880' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px}
+.form-textarea{resize:none;height:80px}
+.btn{padding:14px 16px;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s}
+.btn:hover{transform:translateY(-2px)}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-secondary{background:var(--surface2);color:var(--text);border:1px solid rgba(255,255,255,.06)}
+.btn-danger{background:rgba(248,113,113,.1);color:var(--red)}
+.btn-success{background:rgba(52,211,153,.1);color:var(--green)}
+.btn-orange{background:rgba(251,147,60,.1);color:var(--orange)}
+.btn-sm{padding:10px 14px;font-size:13px}
+.btn-icon{width:40px;height:40px;padding:0;display:flex;align-items:center;justify-content:center}
+.del-btn{position:absolute;top:10px;right:10px;background:rgba(248,113,113,.1);border:none;color:var(--red);width:32px;height:32px;border-radius:8px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);display:none;align-items:flex-end;z-index:200;opacity:0;transition:opacity .3s}
+.modal-overlay.active{display:flex;opacity:1}
+.modal{background:var(--surface);border-radius:20px 20px 0 0;padding:24px;width:100%;max-height:90vh;overflow-y:auto;animation:slideUpModal .3s ease}
+@keyframes slideUpModal{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-handle{width:40px;height:4px;background:var(--surface2);border-radius:2px;margin:0 auto 24px}
+.modal-title{font-size:18px;font-weight:700;margin-bottom:20px;display:flex;align-items:center;gap:8px}
+.setup-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;background:var(--bg);gap:20px;padding:20px}
+.setup-logo{height:80px;object-fit:contain;margin-bottom:10px}
+.setup-title{font-size:28px;font-weight:700;color:var(--text);text-align:center}
+.setup-desc{font-size:14px;color:var(--text2);text-align:center}
+.setup-input{width:100%;max-width:360px;padding:14px 16px;background:var(--surface2);border:1px solid rgba(255,255,255,.06);border-radius:10px;color:var(--text);font-size:15px;font-family:'DM Sans',sans-serif}
+.login-input{width:100%;max-width:360px;padding:14px 16px;background:var(--surface2);border:1px solid rgba(255,255,255,.06);border-radius:10px;color:var(--text);font-size:15px;margin-bottom:10px;font-family:'DM Sans',sans-serif}
+.step-indicator{display:flex;gap:6px;margin-bottom:20px}
+.step-dot{width:8px;height:8px;border-radius:50%;background:var(--surface2)}.step-dot.active{background:var(--accent)}
+.help-box{background:var(--surface2);padding:14px;border-radius:10px;margin-bottom:16px;font-size:12px;width:100%;max-width:360px}
+.help-box h4{margin-bottom:8px;color:var(--accent)}
+.help-box ol{margin-left:20px;color:var(--text2)}
+.help-box li{margin-bottom:4px}
+.toast{position:fixed;top:20px;right:20px;background:var(--surface2);color:var(--text);padding:14px 20px;border-radius:10px;font-size:14px;z-index:300;opacity:0;transition:opacity .3s;max-width:300px;word-wrap:break-word}
+.toast.show{opacity:1}
+.toast.error{background:rgba(248,113,113,.1);color:var(--red);border:1px solid rgba(248,113,113,.3)}
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;gap:12px}
+.empty-icon{font-size:48px;opacity:.5}
+.empty-state p{font-size:14px;color:var(--text2)}
+.search-bar{display:flex;align-items:center;background:var(--surface2);border-radius:10px;padding:0 14px;margin-bottom:14px;border:1px solid rgba(255,255,255,.06)}
+.search-bar span{font-size:16px;color:var(--text2);margin-right:8px}
+.search-bar input{flex:1;background:none;border:none;padding:12px 0;color:var(--text);font-size:14px;outline:none}
+.search-bar input::placeholder{color:var(--text2)}
+.tab-pills{display:flex;gap:8px;overflow-x:auto;margin-bottom:14px;padding-bottom:4px;-webkit-overflow-scrolling:touch}
+.tab-pills::-webkit-scrollbar{display:none}
+.tab-pill{padding:6px 12px;background:var(--surface2);border:1px solid rgba(255,255,255,.06);border-radius:8px;color:var(--text2);font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;font-family:'DM Sans',sans-serif}
+.tab-pill.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.record-item{background:var(--surface2);border-radius:10px;padding:14px;margin-bottom:8px}
+.record-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.record-product{font-size:14px;font-weight:600;color:var(--text)}
+.record-qty{font-size:16px;font-weight:700;font-family:'Space Mono',monospace}
+.record-qty.green{color:var(--green)}
+.record-qty.red{color:var(--red)}
+.drink-card{background:var(--surface2);border-radius:12px;padding:14px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;border:1px solid rgba(255,255,255,.06)}
+.drink-info{flex:1}
+.drink-name{font-weight:600;font-size:14px;color:var(--text)}
+.drink-price{font-size:12px;color:var(--text2);margin-top:4px}
+.drink-add-btn{background:var(--accent);color:#fff;border:none;padding:8px 12px;border-radius:8px;font-weight:600;cursor:pointer;font-size:13px}
+.cart-item{display:flex;align-items:center;justify-content:space-between;background:var(--surface2);padding:12px 14px;border-radius:10px;margin-bottom:8px}
+.cart-drink-name{font-weight:600;font-size:14px;flex:1}
+.cart-qty-controls{display:flex;align-items:center;gap:8px}
+.cart-qty-btn{background:var(--surface3);border:none;color:var(--text);width:28px;height:28px;border-radius:6px;cursor:pointer;font-weight:600}
+.cart-qty-btn:hover{background:var(--accent);color:#fff}
+.cart-qty-display{font-weight:600;width:30px;text-align:center;font-family:'Space Mono',monospace}
+.cart-price{font-family:'Space Mono',monospace;font-weight:700;text-align:right;color:var(--accent)}
+.cart-delete{background:rgba(248,113,113,.1);border:none;color:var(--red);width:28px;height:28px;border-radius:6px;cursor:pointer;margin-left:8px}
+.working-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:999;flex-direction:column;gap:20px}
+.working-overlay.show{display:flex}
+.working-spinner{width:60px;height:60px;border:4px solid rgba(200,145,90,.2);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.working-text{color:var(--accent);font-size:14px;text-align:center;max-width:80%}
+.ingredient-input-group{background:var(--surface2);padding:12px;border-radius:10px;margin-bottom:10px;display:flex;gap:8px;align-items:flex-end}
+.ingredient-input-group input{flex:1;padding:10px 12px;background:var(--surface3);border:1px solid rgba(255,255,255,.06);border-radius:8px;color:var(--text);font-size:13px}
+.ingredient-input-group input::placeholder{color:var(--text2)}
+.ingredient-input-group .ingredient-del{background:rgba(248,113,113,.1);border:none;color:var(--red);width:32px;height:32px;border-radius:6px;cursor:pointer}
+.recipe-item{background:var(--surface2);border-radius:12px;padding:14px;margin-bottom:10px;border:1px solid rgba(255,255,255,.06)}
+.recipe-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.recipe-name{font-weight:600;font-size:14px;color:var(--text)}
+.recipe-price{font-family:'Space Mono',monospace;font-weight:700;color:var(--accent)}
+.recipe-ingredients{font-size:12px;color:var(--text2);line-height:1.6}
+.recipe-ing-item{display:flex;gap:8px;margin-bottom:4px}
+.recipe-ing-item span:first-child{color:var(--accent);font-weight:600;min-width:40px}
+.recipe-ing-item span:last-child{flex:1}
+.collapsible-header{display:flex;align-items:center;justify-content:space-between;padding:14px;background:var(--surface2);border-radius:10px;margin-bottom:8px;cursor:pointer;border:none;width:100%;color:var(--text);font-family:'DM Sans',sans-serif}
+.collapsible-header .arrow{transition:transform .3s;font-size:12px}
+.collapsible-header .arrow.open{transform:rotate(180deg)}
+.collapsible-body{overflow:hidden;transition:max-height .3s ease}
+.collapsible-body.collapsed{max-height:0;overflow:hidden}
+.collapsible-body.expanded{max-height:2000px}
+.autocomplete-container{position:relative}
+.autocomplete-dropdown{position:absolute;top:100%;left:0;right:0;background:var(--surface);border:1px solid rgba(255,255,255,.1);border-radius:0 0 10px 10px;max-height:200px;overflow-y:auto;z-index:50}
+.autocomplete-option{padding:12px 16px;cursor:pointer;font-size:14px;border-bottom:1px solid rgba(255,255,255,.04)}
+.autocomplete-option:hover,.autocomplete-option:active{background:var(--surface2)}
+.quick-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px}
+.quick-btn{display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 8px;background:var(--surface2);border-radius:var(--radius);border:none;cursor:pointer;color:var(--text);font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500}
+.quick-btn:active{transform:scale(.96)}
+.quick-icon{font-size:24px}
+.quick-label{font-size:11px;font-weight:600;text-align:center}
+.cart-badge{position:absolute;top:2px;right:calc(50% - 20px);background:var(--red);color:#fff;font-size:9px;font-weight:700;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 4px}
+.sub-tabs{display:flex;gap:8px;margin-bottom:16px}
+.sub-tab{padding:8px 14px;background:var(--surface2);border:1px solid rgba(255,255,255,.06);border-radius:8px;color:var(--text2);font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap}
+.sub-tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.tier-info{font-size:11px;color:var(--text2);margin-bottom:8px;padding:8px;background:var(--surface2);border-radius:8px}
+</style>
+</head>
+<body>
+
+<div id="app"></div>
+<div id="modal-container"></div>
+<div id="toast-container"></div>
+<div class="working-overlay" id="working-overlay">
+  <div class="working-spinner"></div>
+  <div class="working-text" id="working-text">Procesando...</div>
+</div>
+
+<script>
+const LOGO = 'logo.png';
+const DRINK_CATEGORIES = [
+  'Café clásico', 'Chocolates', 'Capuccinos grandes', 'Capuccinos medianos',
+  'Lattes grandes', 'Lattes medianos', 'Tés exóticos calientes', 'Tisanas Calientes',
+  'Tisanas frías', 'Tisanas Smoothies', 'Tés exóticos Fríos', 'Bebidas frías',
+  'Frappes', 'Smoothies con leche', 'Smoothies con agua', 'Lattes fríos',
+  'Smoothies de Baileys', 'Smoothies de yogurt', 'Especiales con espresso'
+];
+const INGREDIENT_CATEGORIES = ['Jarabes', 'Bases', 'Lácteos', 'Café', 'Tés', 'Extras', 'Frutas', 'Polvos'];
+const UNIT_OPTIONS = ['oz', 'cucharadas', 'gr', 'ml', 'shots', 'pzas', 'kg', 'L'];
+
+let S = {
+  screen: 'setup', tab: 'home', tab2: null, tab3: null,
+  sheetId: localStorage.getItem('sheetId') || '',
+  apiKey: localStorage.getItem('apiKey') || '',
+  currentUser: JSON.parse(localStorage.getItem('currentUser')) || null,
+  connected: false,
+  catalogo: [], almacen: [], barra: [], recetas: [], usuarios: [],
+  compras: [], traspasos: [], ventas: [], mermas: [], bitacora: [],
+  tpvCart: [],
+  invSearchAlmacen: '', invSearchBarra: '',
+  tpvCategory: null,
+  invFilterCategory: null,
+  entradaSearchCompra: '', entradaSearchTraspaso: ''
+};
+
+let Sheets = {
+  async loadCatalogo() {
+    const data = await this.read('☕ Catálogo');
+    S.catalogo = (data || []).map((row, idx) => ({
+      id: row[0] || idx,
+      producto: row[1] || '',
+      categoria: row[2] || '',
+      rendimientoPorciones: parseFloat(row[3]) || 0,
+      unidadPorcion: row[4] || 'oz',
+      stockMinimoAlmacen: parseFloat(row[5]) || 0,
+      stockMinimoBarra: parseFloat(row[6]) || 0,
+      activo: row[7] !== 'No'
+    })).filter(r => r.producto);
+  },
+
+  async loadAlmacen() {
+    const data = await this.read('🏪 Almacén');
+    S.almacen = (data || []).map((row, idx) => ({
+      id: row[0] || idx,
+      categoria: row[1] || '',
+      producto: row[2] || '',
+      stockActual: parseFloat(row[3]) || 0,
+      stockMinimo: parseFloat(row[4]) || 0,
+      estado: row[5] || 'OK'
+    })).filter(r => r.producto);
+  },
+
+  async loadBarra() {
+    const data = await this.read('🍺 Barra');
+    S.barra = (data || []).map((row, idx) => ({
+      id: row[0] || idx,
+      categoria: row[1] || '',
+      producto: row[2] || '',
+      stockActual: parseFloat(row[3]) || 0,
+      stockMinimo: parseFloat(row[4]) || 0,
+      unidadPorcion: row[5] || 'oz',
+      estado: row[6] || 'OK'
+    })).filter(r => r.producto);
+  },
+
+  async loadRecetas() {
+    const data = await this.read('🍽️ Recetas');
+    S.recetas = (data || []).map((row, idx) => {
+      let ing = [];
+      try { ing = JSON.parse(row[3] || '[]'); } catch(e) { ing = []; }
+      return {
+        id: row[0] || idx,
+        categoriaBebida: row[1] || '',
+        nombreBebida: row[2] || '',
+        ingredientes: ing,
+        precio: parseFloat(row[4]) || 0,
+        descripcion: row[5] || '',
+        activo: row[6] !== 'No'
+      };
+    }).filter(r => r.nombreBebida);
+  },
+
+  async loadCompras() {
+    const data = await this.read('📥 Compras');
+    S.compras = (data || []).map((row, idx) => ({
+      id: row[0] || idx,
+      fecha: row[1] || '',
+      hora: row[2] || '',
+      producto: row[3] || '',
+      cantidad: parseFloat(row[4]) || 0,
+      presentacion: row[5] || '',
+      usuario: row[6] || '',
+      notas: row[7] || ''
+    })).filter(r => r.producto);
+  },
+
+  async loadTraspasos() {
+    const data = await this.read('🔄 Traspasos');
+    S.traspasos = (data || []).map((row, idx) => ({
+      id: row[0] || idx,
+      fecha: row[1] || '',
+      hora: row[2] || '',
+      producto: row[3] || '',
+      cantidadUnidades: parseFloat(row[4]) || 0,
+      porcionesGeneradas: parseFloat(row[5]) || 0,
+      unidadPorcion: row[6] || 'oz',
+      usuario: row[7] || '',
+      notas: row[8] || ''
+    })).filter(r => r.producto);
+  },
+
+  async loadVentas() {
+    const data = await this.read('💰 Ventas');
+    S.ventas = (data || []).map((row, idx) => {
+      let descontados = [];
+      try { descontados = JSON.parse(row[9] || '[]'); } catch(e) { descontados = []; }
+      return {
+        id: row[0] || idx,
+        fecha: row[1] || '',
+        bebida: row[2] || '',
+        cantidad: parseInt(row[3]) || 1,
+        precio: parseFloat(row[4]) || 0,
+        total: parseFloat(row[5]) || 0,
+        usuario: row[6] || '',
+        notas: row[7] || '',
+        ingredientesDescontados: descontados
+      };
+    }).filter(r => r.bebida);
+  },
+
+  async loadMermas() {
+    const data = await this.read('⚠️ Mermas');
+    S.mermas = (data || []).map((row, idx) => ({
+      id: row[0] || idx,
+      fecha: row[1] || '',
+      producto: row[2] || '',
+      cantidad: parseFloat(row[3]) || 0,
+      unidadPorcion: row[4] || 'oz',
+      razon: row[5] || '',
+      usuario: row[6] || '',
+      notas: row[7] || ''
+    })).filter(r => r.producto);
+  },
+
+  async loadUsers() {
+    const data = await this.read('👤 Usuarios');
+    S.usuarios = (data || []).map((row, idx) => ({
+      id: row[0] || idx,
+      usuario: row[1] || '',
+      password: row[2] || '',
+      nombre: row[3] || '',
+      rol: row[4] || 'barista'
+    })).filter(r => r.usuario);
+  },
+
+  async loadBitacora() {
+    const data = await this.read('📜 Bitácora');
+    S.bitacora = (data || []).map((row, idx) => ({
+      id: row[0] || idx,
+      fecha: row[1] || '',
+      hora: row[2] || '',
+      usuario: row[3] || '',
+      accion: row[4] || '',
+      descripcion: row[5] || '',
+      tipo: row[6] || ''
+    })).filter(r => r.accion);
+  },
+
+  async loadAll() {
+    try {
+      showWorking();
+      await Promise.all([
+        this.loadCatalogo(), this.loadAlmacen(), this.loadBarra(),
+        this.loadRecetas(), this.loadCompras(), this.loadTraspasos(),
+        this.loadVentas(), this.loadMermas(), this.loadUsers(), this.loadBitacora()
+      ]);
+      S.connected = true;
+    } catch (e) {
+      console.error('Load error:', e);
+      S.connected = false;
+    }
+    hideWorking();
+  },
+
+  async read(sheet) {
+    if (!S.apiKey) return [];
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${S.sheetId}/values/${encodeURIComponent(sheet)}?key=${S.apiKey}`;
+    const r = await fetch(url);
+    if (!r.ok) return [];
+    const json = await r.json();
+    return json.values ? json.values.slice(1) : [];
+  },
+
+  async append(sheet, values) {
+    const scriptUrl = localStorage.getItem('scriptUrl');
+    if (!scriptUrl) { toast('Configura el Apps Script URL', 1); return; }
+    const r = await fetch(scriptUrl, { method: 'POST', body: JSON.stringify({ sheet, values }) });
+    const json = await r.json();
+    return json.success;
+  }
+};
+
+function showWorking(text = 'Procesando...') {
+  document.getElementById('working-text').textContent = text;
+  document.getElementById('working-overlay').classList.add('show');
+}
+function hideWorking() {
+  document.getElementById('working-overlay').classList.remove('show');
+}
+
+function toast(msg, err = 0) {
+  const el = document.createElement('div');
+  el.className = 'toast' + (err ? ' error' : '') + ' show';
+  el.textContent = msg;
+  document.getElementById('toast-container').appendChild(el);
+  setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 300); }, 3000);
+}
+
+function logAction(accion, descripcion, tipo = 'info') {
+  const now = new Date();
+  const fecha = now.toISOString().split('T')[0];
+  const hora = now.toTimeString().split(' ')[0];
+  const values = [fecha, hora, S.currentUser.usuario, accion, descripcion, tipo];
+  Sheets.append('📜 Bitácora', values);
+}
+
+function renderSetup() {
+  let step = parseInt(localStorage.getItem('setupStep') || '0');
+  if (!S.sheetId) step = 0;
+  else if (!localStorage.getItem('scriptUrl')) step = 1;
+
+  if (step === 0) {
+    return `<div class="setup-screen">
+      <img src="${LOGO}" class="setup-logo" onerror="this.style.display='none'">
+      <div class="setup-title">☕ Mozzafiato Baristas</div>
+      <div class="setup-desc">Paso 1: Configura tu Google Sheet</div>
+      <div class="step-indicator">
+        <div class="step-dot active"></div>
+        <div class="step-dot"></div>
+      </div>
+      <input class="setup-input" id="sheet-id" placeholder="Sheet ID..." value="${S.sheetId}">
+      <input class="setup-input" id="api-key" placeholder="API Key..." value="${S.apiKey}">
+      <button class="btn btn-primary" onclick="doSetupStep0()">Siguiente →</button>
+      <div class="help-box">
+        <h4>Cómo obtener:</h4>
+        <ol>
+          <li>Copia la ID de tu Sheet de la URL (entre /d/ y /edit)</li>
+          <li>Genera una API Key en Google Cloud Console</li>
+        </ol>
+      </div>
+    </div>`;
+  } else {
+    return `<div class="setup-screen">
+      <img src="${LOGO}" class="setup-logo" onerror="this.style.display='none'">
+      <div class="setup-title">☕ Mozzafiato Baristas</div>
+      <div class="setup-desc">Paso 2: Apps Script URL</div>
+      <div class="step-indicator">
+        <div class="step-dot active"></div>
+        <div class="step-dot active"></div>
+      </div>
+      <input class="setup-input" id="script-url" placeholder="https://script.google.com/..." value="${localStorage.getItem('scriptUrl') || ''}">
+      <button class="btn btn-primary" onclick="doSetupStep1()">Completar Setup ✓</button>
+      <div class="help-box">
+        <h4>Apps Script URL:</h4>
+        <ol>
+          <li>Copia la URL de tu Apps Script (Deployment - web app URL)</li>
+          <li>Asegúrate de que tenga acceso a la Sheet</li>
+        </ol>
+      </div>
+    </div>`;
+  }
+}
+
+async function doSetupStep0() {
+  const id = document.getElementById('sheet-id').value.trim();
+  const key = document.getElementById('api-key').value.trim();
+  if (!id || !key) { toast('Completa los campos', 1); return; }
+  S.sheetId = id;
+  S.apiKey = key;
+  localStorage.setItem('sheetId', id);
+  localStorage.setItem('apiKey', key);
+  localStorage.setItem('setupStep', '1');
+  render();
+}
+
+async function doSetupStep1() {
+  const url = document.getElementById('script-url').value.trim();
+  if (!url) { toast('Ingresa la URL del Apps Script', 1); return; }
+  localStorage.setItem('scriptUrl', url);
+  localStorage.setItem('setupStep', '2');
+  S.screen = 'login';
+  render();
+}
+
+function renderLogin() {
+  return `<div class="setup-screen">
+    <img src="${LOGO}" class="setup-logo" onerror="this.style.display='none'">
+    <div class="setup-title">☕ Mozzafiato Baristas</div>
+    <div class="setup-desc">Inicia sesión</div>
+    <input class="login-input" id="lu" placeholder="👤 Usuario" autocapitalize="off" autocomplete="off">
+    <input class="login-input" id="lp" placeholder="🔒 Contraseña" type="password" onkeydown="if(event.key==='Enter')doLogin()">
+    <div style="width:100%;max-width:360px">
+      <button class="btn btn-primary" onclick="doLogin()">🔑 Entrar</button>
+    </div>
+    <div style="margin-top:20px;font-size:11px;color:var(--text2)">Solicita tus credenciales al administrador</div>
+  </div>`;
+}
+
+async function doLogin() {
+  const u = document.getElementById('lu').value.trim().toLowerCase();
+  const p = document.getElementById('lp').value;
+  if (!u || !p) { toast('Completa campos', 1); return; }
+  await Sheets.loadUsers();
+  const f = S.usuarios.find(x => x.usuario.toLowerCase() === u && x.password === p);
+  if (!f) { toast('Credenciales incorrectas', 1); return; }
+  S.currentUser = { id: f.id, usuario: f.usuario, nombre: f.nombre, rol: f.rol };
+  localStorage.setItem('currentUser', JSON.stringify(S.currentUser));
+  S.screen = 'main';
+  toast('¡Hola, ' + f.nombre + '!');
+  await Sheets.loadAll();
+  render();
+}
+
+function logout() {
+  logAction('Cierre de sesión', 'Salió del sistema', 'logout');
+  S.currentUser = null;
+  localStorage.removeItem('currentUser');
+  S.screen = 'login';
+  S.tab = 'home';
+  S.tpvCart = [];
+  render();
+  toast('Sesión cerrada');
+}
+
+function getAlertasAlmacen() {
+  return S.almacen.filter(a => a.stockActual <= a.stockMinimo);
+}
+
+function getAlertasBarra() {
+  return S.barra.filter(b => b.stockActual <= b.stockMinimo);
+}
+
+function renderHome() {
+  const hoy = new Date().toISOString().split('T')[0];
+  const ventasHoy = S.ventas.filter(v => v.fecha === hoy);
+  const totalHoy = ventasHoy.reduce((sum, v) => sum + v.total, 0);
+  const cantHoy = ventasHoy.reduce((sum, v) => sum + v.cantidad, 0);
+  const alertasAlmacen = getAlertasAlmacen().length;
+  const alertasBarra = getAlertasBarra().length;
+
+  return `
+    <div style="margin-bottom:12px">
+      <div class="card-title">💡 Acciones Rápidas</div>
+    </div>
+
+    <div class="quick-grid">
+      <button class="quick-btn" onclick="switchTab('tpv')">
+        <div class="quick-icon">💰</div>
+        <div class="quick-label">TPV</div>
+      </button>
+      <button class="quick-btn" onclick="switchTab('entradas')">
+        <div class="quick-icon">📥</div>
+        <div class="quick-label">Entradas</div>
+      </button>
+      <button class="quick-btn" onclick="switchTab('inventario')">
+        <div class="quick-icon">📦</div>
+        <div class="quick-label">Inventario</div>
+      </button>
+      <button class="quick-btn" onclick="switchTab('recetas')">
+        <div class="quick-icon">🍽️</div>
+        <div class="quick-label">Recetas</div>
+      </button>
+      <button class="quick-btn" onclick="switchTab('mas');S.tab2='mermas'">
+        <div class="quick-icon">⚠️</div>
+        <div class="quick-label">Mermas</div>
+      </button>
+      <button class="quick-btn" onclick="switchTab('mas');S.tab2='reportes'">
+        <div class="quick-icon">📈</div>
+        <div class="quick-label">Reportes</div>
+      </button>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">📊 Estadísticas del Día</div>
+      </div>
+      <div class="stats-grid four">
+        <div class="stat-box purple">
+          <div class="stat-number">$${totalHoy.toFixed(2)}</div>
+          <div class="stat-label">Ventas</div>
+        </div>
+        <div class="stat-box green">
+          <div class="stat-number">${cantHoy}</div>
+          <div class="stat-label">Bebidas</div>
+        </div>
+        <div class="stat-box red">
+          <div class="stat-number">${alertasAlmacen}</div>
+          <div class="stat-label">🏪 Stock Bajo</div>
+        </div>
+        <div class="stat-box orange">
+          <div class="stat-number">${alertasBarra}</div>
+          <div class="stat-label">🍺 Bajo Barra</div>
+        </div>
+      </div>
+    </div>
+
+    ${alertasAlmacen > 0 ? `
+    <button class="collapsible-header" onclick="this.nextElementSibling.classList.toggle('collapsed');this.nextElementSibling.classList.toggle('expanded');this.querySelector('.arrow').classList.toggle('open')">
+      <span>🏪 Alertas Almacén (${alertasAlmacen})</span>
+      <span class="arrow">▲</span>
+    </button>
+    <div class="collapsible-body expanded">
+      ${getAlertasAlmacen().map(a => {
+        const cat = S.catalogo.find(c => c.producto === a.producto);
+        return `<div class="inv-item">
+          <div>
+            <div class="inv-name">${a.producto}</div>
+            <div class="inv-cat">${a.categoria}</div>
+          </div>
+          <div>
+            <div class="inv-stock low">${a.stockActual} unidades</div>
+            <div class="inv-min">Mín: ${a.stockMinimo}</div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+    ` : ''}
+
+    ${alertasBarra > 0 ? `
+    <button class="collapsible-header" onclick="this.nextElementSibling.classList.toggle('collapsed');this.nextElementSibling.classList.toggle('expanded');this.querySelector('.arrow').classList.toggle('open')">
+      <span>🍺 Alertas Barra (${alertasBarra})</span>
+      <span class="arrow">▲</span>
+    </button>
+    <div class="collapsible-body expanded">
+      ${getAlertasBarra().map(b => {
+        return `<div class="inv-item">
+          <div>
+            <div class="inv-name">${b.producto}</div>
+            <div class="inv-cat">${b.categoria}</div>
+          </div>
+          <div>
+            <div class="inv-stock warn">${b.stockActual} ${b.unidadPorcion}</div>
+            <div class="inv-min">Mín: ${b.stockMinimo}</div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+    ` : ''}
+
+    ${ventasHoy.length > 0 ? `
+    <button class="collapsible-header" onclick="this.nextElementSibling.classList.toggle('collapsed');this.nextElementSibling.classList.toggle('expanded');this.querySelector('.arrow').classList.toggle('open')">
+      <span>💰 Ventas del Día (${ventasHoy.length})</span>
+      <span class="arrow">▲</span>
+    </button>
+    <div class="collapsible-body expanded">
+      ${ventasHoy.slice(-5).map(v => `
+        <div class="record-item">
+          <div class="record-top">
+            <div class="record-product">${v.bebida}</div>
+            <div class="record-qty green">+${v.cantidad}</div>
+          </div>
+          <div style="font-size:11px;color:var(--text2)">$${v.total.toFixed(2)} - ${v.usuario}</div>
+        </div>
+      `).join('')}
+    </div>
+    ` : ''}
+  `;
+}
+
+function renderInventario() {
+  const tabAlmacen = S.tab3 === 'barra' ? false : true;
+
+  if (tabAlmacen) {
+    return `
+      <div class="sub-tabs">
+        <button class="sub-tab active" onclick="S.tab3=null;render()">🏪 Almacén</button>
+        <button class="sub-tab" onclick="S.tab3='barra';render()">🍺 Barra</button>
+      </div>
+
+      <div class="tier-info">
+      Almacén = Stock de unidades cerradas (botellas, bolsas, kilos)
+      </div>
+
+      <div class="search-bar">
+        <span>🔍</span>
+        <input type="text" id="search-almacen" placeholder="Buscar producto..." onkeyup="updateAlmacenList()" value="${S.invSearchAlmacen}">
+      </div>
+
+      <div class="form-group">
+        <select onchange="S.invFilterCategory=this.value;updateAlmacenList()">
+          <option value="">Todas las categorías</option>
+          ${INGREDIENT_CATEGORIES.map(c => `<option value="${c}" ${S.invFilterCategory===c?'selected':''}>${c}</option>`).join('')}
+        </select>
+      </div>
+
+      <div id="almacen-list">
+        ${S.almacen
+          .filter(a => !S.invFilterCategory || a.categoria === S.invFilterCategory)
+          .map(a => {
+            const isCritical = a.stockActual <= a.stockMinimo * 0.5;
+            const isWarning = a.stockActual <= a.stockMinimo;
+            const statusBadge = isCritical ? 'critical' : isWarning ? 'warning' : 'good';
+            const statusLabel = isCritical ? 'Crítico' : isWarning ? 'Bajo' : 'OK';
+            return `
+              <div class="inv-item">
+                <div>
+                  <div class="inv-name">${a.producto}</div>
+                  <div class="inv-cat">${a.categoria}</div>
+                </div>
+                <div style="text-align:right">
+                  <div class="inv-stock ${isWarning ? 'low' : 'ok'}">${a.stockActual} unid.</div>
+                  <div class="inv-min">Mín: ${a.stockMinimo}</div>
+                  <div style="margin-top:4px"><span class="badge ${statusBadge}">${statusLabel}</span></div>
+                </div>
+              </div>
+            `;
+          }).join('')}
+      </div>
+    `;
+  } else {
+    return `
+      <div class="sub-tabs">
+        <button class="sub-tab" onclick="S.tab3=null;render()">🏪 Almacén</button>
+        <button class="sub-tab active" onclick="S.tab3='barra';render()">🍺 Barra</button>
+      </div>
+
+      <div class="tier-info">
+      Barra = Stock de porciones abiertas (oz, gr, cucharadas, ml)
+      </div>
+
+      <div class="search-bar">
+        <span>🔍</span>
+        <input type="text" id="search-barra" placeholder="Buscar producto..." onkeyup="updateBarraList()" value="${S.invSearchBarra}">
+      </div>
+
+      <div class="form-group">
+        <select onchange="S.invFilterCategory=this.value;updateBarraList()">
+          <option value="">Todas las categorías</option>
+          ${INGREDIENT_CATEGORIES.map(c => `<option value="${c}" ${S.invFilterCategory===c?'selected':''}>${c}</option>`).join('')}
+        </select>
+      </div>
+
+      <div id="barra-list">
+        ${S.barra
+          .filter(b => !S.invFilterCategory || b.categoria === S.invFilterCategory)
+          .map(b => {
+            const isCritical = b.stockActual <= b.stockMinimo * 0.5;
+            const isWarning = b.stockActual <= b.stockMinimo;
+            const statusBadge = isCritical ? 'critical' : isWarning ? 'warning' : 'good';
+            const statusLabel = isCritical ? 'Crítico' : isWarning ? 'Bajo' : 'OK';
+            return `
+              <div class="inv-item">
+                <div>
+                  <div class="inv-name">${b.producto}</div>
+                  <div class="inv-cat">${b.categoria}</div>
+                </div>
+                <div style="text-align:right">
+                  <div class="inv-stock ${isWarning ? 'low' : 'ok'}">${b.stockActual.toFixed(1)} ${b.unidadPorcion}</div>
+                  <div class="inv-min">Mín: ${b.stockMinimo}</div>
+                  <div style="margin-top:4px"><span class="badge ${statusBadge}">${statusLabel}</span></div>
+                </div>
+              </div>
+            `;
+          }).join('')}
+      </div>
+    `;
+  }
+}
+
+function updateAlmacenList() {
+  const search = document.getElementById('search-almacen')?.value.toLowerCase() || '';
+  S.invSearchAlmacen = search;
+  const list = document.getElementById('almacen-list');
+  if (!list) return;
+
+  const filtered = S.almacen.filter(a =>
+    (!S.invFilterCategory || a.categoria === S.invFilterCategory) &&
+    (a.producto.toLowerCase().includes(search) || a.categoria.toLowerCase().includes(search))
+  );
+
+  list.innerHTML = filtered.map(a => {
+    const isCritical = a.stockActual <= a.stockMinimo * 0.5;
+    const isWarning = a.stockActual <= a.stockMinimo;
+    const statusBadge = isCritical ? 'critical' : isWarning ? 'warning' : 'good';
+    const statusLabel = isCritical ? 'Crítico' : isWarning ? 'Bajo' : 'OK';
+    return `
+      <div class="inv-item">
+        <div>
+          <div class="inv-name">${a.producto}</div>
+          <div class="inv-cat">${a.categoria}</div>
+        </div>
+        <div style="text-align:right">
+          <div class="inv-stock ${isWarning ? 'low' : 'ok'}">${a.stockActual} unid.</div>
+          <div class="inv-min">Mín: ${a.stockMinimo}</div>
+          <div style="margin-top:4px"><span class="badge ${statusBadge}">${statusLabel}</span></div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function updateBarraList() {
+  const search = document.getElementById('search-barra')?.value.toLowerCase() || '';
+  S.invSearchBarra = search;
+  const list = document.getElementById('barra-list');
+  if (!list) return;
+
+  const filtered = S.barra.filter(b =>
+    (!S.invFilterCategory || b.categoria === S.invFilterCategory) &&
+    (b.producto.toLowerCase().includes(search) || b.categoria.toLowerCase().includes(search))
+  );
+
+  list.innerHTML = filtered.map(b => {
+    const isCritical = b.stockActual <= b.stockMinimo * 0.5;
+    const isWarning = b.stockActual <= b.stockMinimo;
+    const statusBadge = isCritical ? 'critical' : isWarning ? 'warning' : 'good';
+    const statusLabel = isCritical ? 'Crítico' : isWarning ? 'Bajo' : 'OK';
+    return `
+      <div class="inv-item">
+        <div>
+          <div class="inv-name">${b.producto}</div>
+          <div class="inv-cat">${b.categoria}</div>
+        </div>
+        <div style="text-align:right">
+          <div class="inv-stock ${isWarning ? 'low' : 'ok'}">${b.stockActual.toFixed(1)} ${b.unidadPorcion}</div>
+          <div class="inv-min">Mín: ${b.stockMinimo}</div>
+          <div style="margin-top:4px"><span class="badge ${statusBadge}">${statusLabel}</span></div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderTPV() {
+  const total = S.tpvCart.reduce((sum, item) => sum + (item.precio * item.qty), 0);
+  const cartCount = S.tpvCart.reduce((sum, item) => sum + item.qty, 0);
+
+  const activeCategory = S.tpvCategory || DRINK_CATEGORIES[0];
+  const drinks = S.recetas.filter(r => r.categoriaBebida === activeCategory && r.activo);
+
+  return `
+    <div class="tab-pills">
+      ${DRINK_CATEGORIES.map(cat => `
+        <button class="tab-pill ${cat === activeCategory ? 'active' : ''}" onclick="S.tpvCategory='${cat}';render()">
+          ${cat.substring(0, 12)}...
+        </button>
+      `).join('')}
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+      <div>
+        <div class="card-title">Bebidas</div>
+        <div style="margin-top:10px">
+          ${drinks.length ? drinks.map(d => `
+            <div class="drink-card">
+              <div class="drink-info">
+                <div class="drink-name">${d.nombreBebida}</div>
+                <div class="drink-price">$${d.precio.toFixed(2)}</div>
+              </div>
+              <button class="drink-add-btn" onclick="addToCart('${d.nombreBebida}',${d.precio})">+</button>
+            </div>
+          `).join('') : '<div style="color:var(--text2);font-size:12px">Sin bebidas en esta categoría</div>'}
+        </div>
+      </div>
+
+      <div>
+        <div class="card-title">🛒 Carrito ${cartCount > 0 ? `<span class="cart-badge">${cartCount}</span>` : ''}</div>
+        <div style="margin-top:10px">
+          ${S.tpvCart.length ? `
+            ${S.tpvCart.map((item, idx) => `
+              <div class="cart-item">
+                <div class="cart-drink-name">${item.nombre}</div>
+                <div class="cart-qty-controls">
+                  <button class="cart-qty-btn" onclick="updateCartQty(${idx},-1)">−</button>
+                  <div class="cart-qty-display">${item.qty}</div>
+                  <button class="cart-qty-btn" onclick="updateCartQty(${idx},1)">+</button>
+                </div>
+                <div class="cart-price">$${(item.precio * item.qty).toFixed(2)}</div>
+                <button class="cart-delete" onclick="removeFromCart(${idx})">✕</button>
+              </div>
+            `).join('')}
+            <div class="card" style="margin-top:10px">
+              <div style="display:flex;justify-content:space-between;margin-bottom:12px">
+                <span>Total:</span>
+                <span style="font-family:'Space Mono',monospace;font-weight:700;color:var(--accent)">$${total.toFixed(2)}</span>
+              </div>
+              <button class="btn btn-primary" onclick="checkoutTPV()">💰 Cobrar</button>
+            </div>
+          ` : '<div style="color:var(--text2);font-size:12px;text-align:center;padding:20px">El carrito está vacío</div>'}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function addToCart(nombre, precio) {
+  const item = S.tpvCart.find(i => i.nombre === nombre);
+  if (item) {
+    item.qty++;
+  } else {
+    S.tpvCart.push({ nombre, precio, qty: 1 });
+  }
+  render();
+}
+
+function updateCartQty(idx, delta) {
+  S.tpvCart[idx].qty += delta;
+  if (S.tpvCart[idx].qty <= 0) {
+    S.tpvCart.splice(idx, 1);
+  }
+  render();
+}
+
+function removeFromCart(idx) {
+  S.tpvCart.splice(idx, 1);
+  render();
+}
+
+async function checkoutTPV() {
+  if (!S.tpvCart.length) { toast('Carrito vacío', 1); return; }
+
+  const now = new Date();
+  const fecha = now.toISOString().split('T')[0];
+  const hora = now.toTimeString().split(' ')[0];
+  const total = S.tpvCart.reduce((sum, item) => sum + (item.precio * item.qty), 0);
+
+  const ingredientesDescontados = [];
+  let allValid = true;
+
+  for (const cartItem of S.tpvCart) {
+    const recipe = S.recetas.find(r => r.nombreBebida === cartItem.nombre);
+    if (!recipe) continue;
+
+    for (const ing of recipe.ingredientes) {
+      const barraItem = S.barra.find(b => b.producto === ing.ing);
+      if (!barraItem) {
+        toast(`Ingrediente "${ing.ing}" no encontrado en barra`, 1);
+        allValid = false;
+        continue;
+      }
+
+      const needed = ing.cant * cartItem.qty;
+      if (barraItem.stockActual < needed) {
+        toast(`Stock bajo de "${ing.ing}" (tienes ${barraItem.stockActual}, necesitas ${needed})`, 1);
+      }
+
+      ingredientesDescontados.push({
+        producto: ing.ing,
+        cantidad: needed,
+        unidad: ing.unit
+      });
+    }
+  }
+
+  const values = [
+    fecha, cartItem.nombre || S.tpvCart[0].nombre,
+    S.tpvCart.reduce((sum, i) => sum + i.qty, 0),
+    S.tpvCart[0].precio || 0, total,
+    S.currentUser.usuario, '', JSON.stringify(ingredientesDescontados)
+  ];
+
+  await Sheets.append('💰 Ventas', values);
+  logAction('Venta TPV', `${S.tpvCart.length} bebidas - $${total.toFixed(2)}`, 'venta');
+
+  S.tpvCart = [];
+  await Sheets.loadVentas();
+  toast(`Venta registrada: $${total.toFixed(2)}`);
+  render();
+}
+
+function renderEntradas() {
+  const tab2 = S.tab2 || 'compra';
+
+  if (tab2 === 'compra') {
+    return `
+      <div class="sub-tabs">
+        <button class="sub-tab active" onclick="S.tab2='compra';render()">📥 Nueva Compra</button>
+        <button class="sub-tab" onclick="S.tab2='traspaso';render()">🔄 Nuevo Traspaso</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Registrar Compra → Almacén</div>
+        <div class="form-group">
+          <div class="form-label">Producto</div>
+          <div class="autocomplete-container">
+            <input class="form-input" id="compra-producto" type="text" placeholder="Buscar producto..." onkeyup="filterProductosCompra()">
+            <div class="autocomplete-dropdown" id="compra-dropdown" style="display:none"></div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="form-label">Cantidad (unidades)</div>
+          <input class="form-input" id="compra-cantidad" type="number" min="0" step="1" placeholder="0">
+        </div>
+
+        <div class="form-group">
+          <div class="form-label">Presentación</div>
+          <input class="form-input" id="compra-presentacion" type="text" placeholder="Ej: Botella 750ml, Bolsa 1kg">
+        </div>
+
+        <div class="form-group">
+          <div class="form-label">Notas</div>
+          <textarea class="form-textarea" id="compra-notas" placeholder="Proveedor, referencia, etc."></textarea>
+        </div>
+
+        <button class="btn btn-primary" onclick="submitCompra()">Registrar Compra</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Historial de Compras</div>
+        ${S.compras.slice(-5).reverse().map(c => `
+          <div class="record-item">
+            <div class="record-top">
+              <div class="record-product">${c.producto}</div>
+              <div class="record-qty green">+${c.cantidad}</div>
+            </div>
+            <div style="font-size:10px;color:var(--text2)">${c.fecha} ${c.hora} - ${c.usuario}</div>
+            <div style="font-size:10px;color:var(--text2)">${c.presentacion}</div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  } else {
+    return `
+      <div class="sub-tabs">
+        <button class="sub-tab" onclick="S.tab2='compra';render()">📥 Nueva Compra</button>
+        <button class="sub-tab active" onclick="S.tab2='traspaso';render()">🔄 Nuevo Traspaso</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Traspaso: Almacén → Barra</div>
+        <div class="form-group">
+          <div class="form-label">Producto</div>
+          <div class="autocomplete-container">
+            <input class="form-input" id="traspaso-producto" type="text" placeholder="Buscar producto..." onkeyup="filterProductosTraspaso()">
+            <div class="autocomplete-dropdown" id="traspaso-dropdown" style="display:none"></div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="form-label">Cantidad de Unidades a Transferir</div>
+          <input class="form-input" id="traspaso-cantidad" type="number" min="0" step="1" placeholder="0">
+        </div>
+
+        <div class="form-group">
+          <div class="form-label">Porciones que se Generarán</div>
+          <input class="form-input" id="traspaso-porciones" type="text" placeholder="Se calcula automáticamente" disabled>
+        </div>
+
+        <div class="form-group">
+          <div class="form-label">Unidad de Porción</div>
+          <input class="form-input" id="traspaso-unidad" type="text" placeholder="oz, gr, cucharadas, ml..." disabled>
+        </div>
+
+        <div class="form-group">
+          <div class="form-label">Notas</div>
+          <textarea class="form-textarea" id="traspaso-notas" placeholder="Observaciones..."></textarea>
+        </div>
+
+        <button class="btn btn-primary" onclick="submitTraspaso()">Confirmar Traspaso</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Historial de Traspasos</div>
+        ${S.traspasos.slice(-5).reverse().map(t => `
+          <div class="record-item">
+            <div class="record-top">
+              <div class="record-product">${t.producto}</div>
+              <div class="record-qty green">${t.cantidadUnidades} unid → ${t.porcionesGeneradas} ${t.unidadPorcion}</div>
+            </div>
+            <div style="font-size:10px;color:var(--text2)">${t.fecha} ${t.hora} - ${t.usuario}</div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+}
+
+function filterProductosCompra() {
+  const input = document.getElementById('compra-producto');
+  const search = input.value.toLowerCase();
+  const dropdown = document.getElementById('compra-dropdown');
+
+  if (!search) {
+    dropdown.style.display = 'none';
+    return;
+  }
+
+  const filtered = S.catalogo.filter(c => c.producto.toLowerCase().includes(search) && c.activo);
+  dropdown.innerHTML = filtered.map(c => `
+    <div class="autocomplete-option" onclick="selectProductoCompra('${c.producto}')">
+      ${c.producto} <span style="color:var(--text2);font-size:11px">${c.categoria}</span>
+    </div>
+  `).join('');
+  dropdown.style.display = filtered.length ? 'block' : 'none';
+}
+
+function selectProductoCompra(producto) {
+  document.getElementById('compra-producto').value = producto;
+  document.getElementById('compra-dropdown').style.display = 'none';
+}
+
+async function submitCompra() {
+  const producto = document.getElementById('compra-producto').value.trim();
+  const cantidad = parseFloat(document.getElementById('compra-cantidad').value) || 0;
+  const presentacion = document.getElementById('compra-presentacion').value.trim();
+  const notas = document.getElementById('compra-notas').value.trim();
+
+  if (!producto || !cantidad || cantidad <= 0) {
+    toast('Completa producto y cantidad', 1);
+    return;
+  }
+
+  const now = new Date();
+  const fecha = now.toISOString().split('T')[0];
+  const hora = now.toTimeString().split(' ')[0];
+
+  const values = [fecha, hora, producto, cantidad, presentacion, S.currentUser.usuario, notas];
+  await Sheets.append('📥 Compras', values);
+  logAction('Nueva Compra', `${producto} - ${cantidad} unidades`, 'entrada');
+
+  document.getElementById('compra-producto').value = '';
+  document.getElementById('compra-cantidad').value = '';
+  document.getElementById('compra-presentacion').value = '';
+  document.getElementById('compra-notas').value = '';
+
+  await Sheets.loadCompras();
+  toast(`Compra registrada: ${producto} x${cantidad}`);
+  render();
+}
+
+function filterProductosTraspaso() {
+  const input = document.getElementById('traspaso-producto');
+  const search = input.value.toLowerCase();
+  const dropdown = document.getElementById('traspaso-dropdown');
+
+  if (!search) {
+    dropdown.style.display = 'none';
+    return;
+  }
+
+  const filtered = S.catalogo.filter(c => c.producto.toLowerCase().includes(search) && c.activo);
+  dropdown.innerHTML = filtered.map(c => `
+    <div class="autocomplete-option" onclick="selectProductoTraspaso('${c.producto}', ${c.rendimientoPorciones}, '${c.unidadPorcion}')">
+      ${c.producto} <span style="color:var(--text2);font-size:11px">${c.rendimientoPorciones} ${c.unidadPorcion} por unidad</span>
+    </div>
+  `).join('');
+  dropdown.style.display = filtered.length ? 'block' : 'none';
+}
+
+function selectProductoTraspaso(producto, rendimiento, unidad) {
+  document.getElementById('traspaso-producto').value = producto;
+  document.getElementById('traspaso-dropdown').style.display = 'none';
+
+  const cantidadInput = document.getElementById('traspaso-cantidad');
+  const porcionesInput = document.getElementById('traspaso-porciones');
+  const unidadInput = document.getElementById('traspaso-unidad');
+
+  unidadInput.value = unidad;
+  cantidadInput.onchange = () => {
+    const cant = parseFloat(cantidadInput.value) || 0;
+    const porciones = cant * rendimiento;
+    porcionesInput.value = porciones.toFixed(2);
+  };
+}
+
+async function submitTraspaso() {
+  const producto = document.getElementById('traspaso-producto').value.trim();
+  const cantidad = parseFloat(document.getElementById('traspaso-cantidad').value) || 0;
+  const porciones = parseFloat(document.getElementById('traspaso-porciones').value) || 0;
+  const unidad = document.getElementById('traspaso-unidad').value.trim();
+  const notas = document.getElementById('traspaso-notas').value.trim();
+
+  if (!producto || !cantidad || cantidad <= 0) {
+    toast('Completa los campos', 1);
+    return;
+  }
+
+  const now = new Date();
+  const fecha = now.toISOString().split('T')[0];
+  const hora = now.toTimeString().split(' ')[0];
+
+  const values = [fecha, hora, producto, cantidad, porciones, unidad, S.currentUser.usuario, notas];
+  await Sheets.append('🔄 Traspasos', values);
+  logAction('Traspaso', `${producto} - ${cantidad} unidades → ${porciones} ${unidad}`, 'traspaso');
+
+  document.getElementById('traspaso-producto').value = '';
+  document.getElementById('traspaso-cantidad').value = '';
+  document.getElementById('traspaso-porciones').value = '';
+  document.getElementById('traspaso-notas').value = '';
+
+  await Sheets.loadTraspasos();
+  toast(`Traspaso registrado: ${porciones} ${unidad} de ${producto}`);
+  render();
+}
+
+function renderRecetas() {
+  const activeCategory = S.tpvCategory || DRINK_CATEGORIES[0];
+  const recipes = S.recetas.filter(r => r.categoriaBebida === activeCategory);
+
+  return `
+    <div class="tab-pills">
+      ${DRINK_CATEGORIES.map(cat => `
+        <button class="tab-pill ${cat === activeCategory ? 'active' : ''}" onclick="S.tpvCategory='${cat}';render()">
+          ${cat.substring(0, 12)}...
+        </button>
+      `).join('')}
+    </div>
+
+    ${recipes.length ? recipes.map(r => `
+      <div class="recipe-item">
+        <div class="recipe-header">
+          <div>
+            <div class="recipe-name">${r.nombreBebida}</div>
+            ${r.descripcion ? `<div style="font-size:11px;color:var(--text2);margin-top:4px">${r.descripcion}</div>` : ''}
+          </div>
+          <div class="recipe-price">$${r.precio.toFixed(2)}</div>
+        </div>
+        <div class="recipe-ingredients">
+          ${r.ingredientes.length ? r.ingredientes.map(ing => `
+            <div class="recipe-ing-item">
+              <span>${ing.cant}</span>
+              <span>${ing.unit} de ${ing.ing}</span>
+            </div>
+          `).join('') : '<span style="color:var(--text2)">Sin ingredientes</span>'}
+        </div>
+      </div>
+    `).join('') : '<div class="empty-state"><div class="empty-icon">📭</div><p>Sin recetas en esta categoría</p></div>'}
+  `;
+}
+
+function renderMas() {
+  const tab2 = S.tab2 || 'mermas';
+
+  if (tab2 === 'mermas') {
+    return `
+      <div class="sub-tabs">
+        <button class="sub-tab active" onclick="S.tab2='mermas';render()">⚠️ Mermas</button>
+        <button class="sub-tab" onclick="S.tab2='bitacora';render()">📜 Bitácora</button>
+        <button class="sub-tab" onclick="S.tab2='reportes';render()">📈 Reportes</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Registrar Merma / Desperdicio</div>
+        <div class="form-group">
+          <div class="form-label">Producto</div>
+          <div class="autocomplete-container">
+            <input class="form-input" id="merma-producto" type="text" placeholder="Buscar producto..." onkeyup="filterProductosMerma()">
+            <div class="autocomplete-dropdown" id="merma-dropdown" style="display:none"></div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="form-label">Cantidad</div>
+          <input class="form-input" id="merma-cantidad" type="number" min="0" step="0.1" placeholder="0">
+        </div>
+
+        <div class="form-group">
+          <div class="form-label">Razón</div>
+          <select class="form-select" id="merma-razon">
+            <option>Derrame accidental</option>
+            <option>Caducado</option>
+            <option>Dañado</option>
+            <option>Control de calidad</option>
+            <option>Otro</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <div class="form-label">Notas</div>
+          <textarea class="form-textarea" id="merma-notas" placeholder="Detalles..."></textarea>
+        </div>
+
+        <button class="btn btn-danger" onclick="submitMerma()">Registrar Merma</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Historial de Mermas</div>
+        ${S.mermas.slice(-5).reverse().map(m => `
+          <div class="record-item">
+            <div class="record-top">
+              <div class="record-product">${m.producto}</div>
+              <div class="record-qty red">-${m.cantidad} ${m.unidadPorcion}</div>
+            </div>
+            <div style="font-size:10px;color:var(--text2)">${m.fecha} - ${m.razon}</div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  } else if (tab2 === 'bitacora') {
+    return `
+      <div class="sub-tabs">
+        <button class="sub-tab" onclick="S.tab2='mermas';render()">⚠️ Mermas</button>
+        <button class="sub-tab active" onclick="S.tab2='bitacora';render()">📜 Bitácora</button>
+        <button class="sub-tab" onclick="S.tab2='reportes';render()">📈 Reportes</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Registro de Actividades</div>
+        ${S.bitacora.slice(-20).reverse().map(b => `
+          <div class="record-item">
+            <div class="record-top">
+              <div class="record-product">${b.accion}</div>
+              <div style="font-size:11px;color:var(--text2);background:rgba(200,145,90,.1);padding:2px 6px;border-radius:4px">${b.tipo}</div>
+            </div>
+            <div style="font-size:11px;color:var(--text2)">${b.descripcion}</div>
+            <div style="font-size:10px;color:var(--text2)">${b.fecha} ${b.hora} - ${b.usuario}</div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  } else {
+    const hoy = new Date().toISOString().split('T')[0];
+    const semana = new Date(Date.now() - 7 * 86400000).toISOString().split('T')[0];
+    const mes = new Date(Date.now() - 30 * 86400000).toISOString().split('T')[0];
+
+    const ventasHoy = S.ventas.filter(v => v.fecha === hoy);
+    const ventasSemana = S.ventas.filter(v => v.fecha >= semana);
+    const ventasMes = S.ventas.filter(v => v.fecha >= mes);
+
+    const comprasHoy = S.compras.filter(c => c.fecha === hoy);
+    const comprasSemana = S.compras.filter(c => c.fecha >= semana);
+
+    const mermasHoy = S.mermas.filter(m => m.fecha === hoy);
+    const mermasSemana = S.mermas.filter(m => m.fecha >= semana);
+
+    const topBebidas = [...S.ventas]
+      .filter(v => v.fecha === hoy)
+      .reduce((acc, v) => {
+        const existing = acc.find(a => a.bebida === v.bebida);
+        if (existing) existing.cantidad += v.cantidad;
+        else acc.push({ bebida: v.bebida, cantidad: v.cantidad });
+        return acc;
+      }, [])
+      .sort((a, b) => b.cantidad - a.cantidad)
+      .slice(0, 5);
+
+    return `
+      <div class="sub-tabs">
+        <button class="sub-tab" onclick="S.tab2='mermas';render()">⚠️ Mermas</button>
+        <button class="sub-tab" onclick="S.tab2='bitacora';render()">📜 Bitácora</button>
+        <button class="sub-tab active" onclick="S.tab2='reportes';render()">📈 Reportes</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📊 Resumen de Ventas</div>
+        <div class="stats-grid three">
+          <div class="stat-box purple">
+            <div class="stat-number">$${ventasHoy.reduce((s, v) => s + v.total, 0).toFixed(0)}</div>
+            <div class="stat-label">Hoy</div>
+          </div>
+          <div class="stat-box blue">
+            <div class="stat-number">$${ventasSemana.reduce((s, v) => s + v.total, 0).toFixed(0)}</div>
+            <div class="stat-label">Semana</div>
+          </div>
+          <div class="stat-box cyan">
+            <div class="stat-number">$${ventasMes.reduce((s, v) => s + v.total, 0).toFixed(0)}</div>
+            <div class="stat-label">Mes</div>
+          </div>
+        </div>
+      </div>
+
+      ${topBebidas.length > 0 ? `
+      <div class="card">
+        <div class="card-title">🏆 Bebidas Más Vendidas (Hoy)</div>
+        ${topBebidas.map(b => `
+          <div class="record-item">
+            <div class="record-top">
+              <div class="record-product">${b.bebida}</div>
+              <div class="record-qty green">x${b.cantidad}</div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+      ` : ''}
+
+      <div class="card">
+        <div class="card-title">📥 Resumen de Compras</div>
+        <div class="stats-grid two">
+          <div class="stat-box orange">
+            <div class="stat-number">${comprasHoy.length}</div>
+            <div class="stat-label">Hoy</div>
+          </div>
+          <div class="stat-box orange">
+            <div class="stat-number">${comprasSemana.length}</div>
+            <div class="stat-label">Semana</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">⚠️ Resumen de Mermas</div>
+        <div class="stats-grid two">
+          <div class="stat-box red">
+            <div class="stat-number">${mermasHoy.length}</div>
+            <div class="stat-label">Hoy</div>
+          </div>
+          <div class="stat-box red">
+            <div class="stat-number">${mermasSemana.length}</div>
+            <div class="stat-label">Semana</div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+}
+
+function filterProductosMerma() {
+  const input = document.getElementById('merma-producto');
+  const search = input.value.toLowerCase();
+  const dropdown = document.getElementById('merma-dropdown');
+
+  if (!search) {
+    dropdown.style.display = 'none';
+    return;
+  }
+
+  const filtered = S.barra.filter(b => b.producto.toLowerCase().includes(search));
+  dropdown.innerHTML = filtered.map(b => `
+    <div class="autocomplete-option" onclick="selectProductoMerma('${b.producto}', '${b.unidadPorcion}')">
+      ${b.producto} <span style="color:var(--text2);font-size:11px">${b.unidadPorcion}</span>
+    </div>
+  `).join('');
+  dropdown.style.display = filtered.length ? 'block' : 'none';
+}
+
+function selectProductoMerma(producto, unidad) {
+  document.getElementById('merma-producto').value = producto;
+  document.getElementById('merma-dropdown').style.display = 'none';
+}
+
+async function submitMerma() {
+  const producto = document.getElementById('merma-producto').value.trim();
+  const cantidad = parseFloat(document.getElementById('merma-cantidad').value) || 0;
+  const razon = document.getElementById('merma-razon').value;
+  const notas = document.getElementById('merma-notas').value.trim();
+
+  if (!producto || !cantidad || cantidad <= 0) {
+    toast('Completa los campos', 1);
+    return;
+  }
+
+  const barraItem = S.barra.find(b => b.producto === producto);
+  if (!barraItem) {
+    toast('Producto no encontrado', 1);
+    return;
+  }
+
+  const now = new Date();
+  const fecha = now.toISOString().split('T')[0];
+
+  const values = [fecha, producto, cantidad, barraItem.unidadPorcion, razon, S.currentUser.usuario, notas];
+  await Sheets.append('⚠️ Mermas', values);
+  logAction('Merma Registrada', `${producto} - ${cantidad} ${barraItem.unidadPorcion} (${razon})`, 'merma');
+
+  document.getElementById('merma-producto').value = '';
+  document.getElementById('merma-cantidad').value = '';
+  document.getElementById('merma-notas').value = '';
+
+  await Sheets.loadMermas();
+  toast(`Merma registrada: ${producto}`);
+  render();
+}
+
+function renderStatusBar() {
+  return `
+    <div class="status-bar">
+      <div class="status-left">
+        <img src="${LOGO}" class="app-logo" onerror="this.style.display='none'">
+        <div class="status-dot ${S.connected ? 'connected' : ''}"></div>
+      </div>
+      <div class="status-right">
+        <button class="user-badge" onclick="toggleUserMenu()">
+          <div class="user-avatar">${S.currentUser.nombre.substring(0, 1).toUpperCase()}</div>
+          <div class="user-name">${S.currentUser.nombre}</div>
+        </button>
+        <button class="config-btn" onclick="showConfig()">⚙️</button>
+      </div>
+    </div>
+  `;
+}
+
+function toggleUserMenu() {
+  const choice = confirm(`👤 ${S.currentUser.nombre}\n${S.currentUser.usuario}\n\n¿Cerrar sesión?`);
+  if (choice) logout();
+}
+
+function showConfig() {
+  const html = `
+    <div class="modal-handle"></div>
+    <div class="modal-title">⚙️ Configuración</div>
+
+    <div class="card">
+      <div class="card-title">Conexión</div>
+      <div style="margin:14px 0;font-size:12px;color:var(--text2)">
+        <div>Sheet ID: <code style="color:var(--accent)">${S.sheetId.substring(0, 16)}...</code></div>
+        <div style="margin-top:8px">Estado: <span class="badge ${S.connected ? 'good' : 'critical'}">${S.connected ? 'Conectado' : 'Desconectado'}</span></div>
+      </div>
+      <button class="btn btn-secondary" onclick="resetConfig()">Resetear Configuración</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Usuario</div>
+      <div style="margin:14px 0;font-size:12px">
+        <strong>${S.currentUser.nombre}</strong><br>
+        <span style="color:var(--text2)">${S.currentUser.usuario}</span><br>
+        <span style="color:var(--text2);font-size:10px;text-transform:uppercase">${S.currentUser.rol}</span>
+      </div>
+      <button class="btn btn-danger" onclick="logout()">Cerrar Sesión</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Acerca de</div>
+      <div style="margin:14px 0;font-size:11px;color:var(--text2);line-height:1.8">
+        <strong>Mozzafiato Baristas</strong><br>
+        Sistema de Gestión de Inventario<br>
+        Versión 2.0 - Dos Niveles<br>
+        <br>
+        Almacén + Barra
+      </div>
+    </div>
+  `;
+  showModal(html);
+}
+
+function resetConfig() {
+  if (!confirm('¿Confirmar? Se borrará toda la configuración.')) return;
+  localStorage.clear();
+  location.reload();
+}
+
+function switchTab(tab) {
+  S.tab = tab;
+  S.tab2 = null;
+  S.tab3 = null;
+  if (tab === 'tpv') S.tpvCategory = DRINK_CATEGORIES[0];
+  render();
+}
+
+function showModal(html) {
+  const overlay = document.getElementById('modal-container');
+  overlay.innerHTML = `<div class="modal-overlay active"><div class="modal">${html}</div></div>`;
+  overlay.querySelector('.modal-overlay').onclick = (e) => {
+    if (e.target === e.currentTarget) {
+      overlay.innerHTML = '';
+    }
+  };
+}
+
+function render() {
+  const app = document.getElementById('app');
+
+  if (S.screen === 'setup') {
+    app.innerHTML = renderSetup();
+  } else if (S.screen === 'login') {
+    app.innerHTML = renderLogin();
+  } else {
+    let mainContent = '';
+    switch (S.tab) {
+      case 'home': mainContent = renderHome(); break;
+      case 'inventario': mainContent = renderInventario(); break;
+      case 'tpv': mainContent = renderTPV(); break;
+      case 'entradas': mainContent = renderEntradas(); break;
+      case 'recetas': mainContent = renderRecetas(); break;
+      case 'mas': mainContent = renderMas(); break;
+      default: mainContent = renderHome();
+    }
+
+    app.innerHTML = `
+      ${renderStatusBar()}
+      <div class="main-content">
+        ${mainContent}
+      </div>
+      <div class="bottom-nav">
+        <button class="nav-item ${S.tab === 'home' ? 'active' : ''}" onclick="switchTab('home')"><div class="nav-icon">🏠</div><div>Inicio</div></button>
+        <button class="nav-item ${S.tab === 'inventario' ? 'active' : ''}" onclick="switchTab('inventario')"><div class="nav-icon">📦</div><div>Inventario</div></button>
+        <button class="nav-item ${S.tab === 'tpv' ? 'active' : ''}" onclick="switchTab('tpv')"><div class="nav-icon">💰</div><div>TPV</div></button>
+        <button class="nav-item ${S.tab === 'entradas' ? 'active' : ''}" onclick="switchTab('entradas')"><div class="nav-icon">📥</div><div>Entradas</div></button>
+        <button class="nav-item ${S.tab === 'recetas' ? 'active' : ''}" onclick="switchTab('recetas')"><div class="nav-icon">🍽️</div><div>Recetas</div></button>
+        <button class="nav-item ${S.tab === 'mas' ? 'active' : ''}" onclick="switchTab('mas')"><div class="nav-icon">⋯</div><div>Más</div></button>
+      </div>
+    `;
+  }
+}
+
+window.addEventListener('load', () => {
+  if (!localStorage.getItem('setupStep')) {
+    localStorage.setItem('setupStep', '0');
+  }
+  if (localStorage.getItem('currentUser') && localStorage.getItem('sheetId')) {
+    S.currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    S.sheetId = localStorage.getItem('sheetId');
+    S.apiKey = localStorage.getItem('apiKey');
+    S.screen = 'main';
+    Sheets.loadAll().then(() => render());
+  } else {
+    render();
+  }
+});
+</script>
+</body>
+</html>
